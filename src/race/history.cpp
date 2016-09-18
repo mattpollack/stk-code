@@ -134,9 +134,9 @@ void History::updateReplay(float dt)
         m_current = 0;
         // This is useful to use a reproducable rewind problem:
         // replay it with history, for debugging only
-#undef DO_REWIND_AT_END_OF_HISTORY
+#define DO_REWIND_AT_END_OF_HISTORY
 #ifdef DO_REWIND_AT_END_OF_HISTORY
-        RewindManager::get()->rewindTo(5.0f);
+        RewindManager::get()->rewindTo(5.5f);
         exit(-1);
 #else
         // Note that for physics replay all physics parameters

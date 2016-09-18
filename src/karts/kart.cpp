@@ -317,7 +317,7 @@ void Kart::reset()
     m_stars_effect->reset();
     m_max_speed->reset();
     m_powerup->reset();
-
+m_powerup->set(PowerupManager::POWERUP_ZIPPER, 255);
     // Reset animations and wheels
     m_kart_model->reset();
 
@@ -1201,21 +1201,47 @@ void Kart::update(float dt)
 
     // Update the position and other data taken from the physics
     Moveable::update(dt);
+    // Compute the speed of the kart. Smooth it with previous speed to make
+    // the camera smoother (because of capping the speed in m_max_speed
+    // the speed value jitters when approaching maximum speed. This results
+    // in the distance between kart and camera to jitter as well (typically
+    // only in the order of centimetres though). Smoothing the speed value
+    // gets rid of this jitter, and also r
+    float old_speed = m_speed;
+    m_speed = getVehicle()->getRigidBody()->getLinearVelocity().length();
+    //float f=0.3f;
+    //m_speed = f*m_speed + (1.0f-f)*old_speed;
+
 
     if(!history->replayHistory() && !RewindManager::get()->isRewinding())
         m_controller->update(dt);
 
-#undef DEBUG_TO_COMPARE_KART_PHYSICS
-#ifdef DEBUG_TO_COMPARE_KART_PHYSICS
-    // This information is useful when comparing kart physics, e.g. to
-    // see top speed, acceleration (i.e. time to top speed) etc.
-    Log::verbose("physics", "%s t %f %f xyz %f %f %f v %f %f %f s %f a %f",
+    Log::verbose("camera", "%s t %f %f xyz %f %f %f v %f %f %f d3 %f d2 %f",
         getIdent().c_str(),
         World::getWorld()->getTime(), dt,
         getXYZ().getX(), getXYZ().getY(), getXYZ().getZ(),
         getVelocity().getX(), getVelocity().getY(), getVelocity().getZ(),
-        getControls().getSteer(),
-        getControls().getAccel());
+        (Camera::getCamera(0)->getXYZ()-getXYZ()).length(),
+        (Camera::getCamera(0)->getXYZ()-getXYZ()).length_2d()
+        );
+
+#define DEBUG_TO_COMPARE_KART_PHYSICS
+#ifdef DEBUG_TO_COMPARE_KART_PHYSICS
+    // This information is useful when comparing kart physics, e.g. to
+    // see top speed, acceleration (i.e. time to top speed) etc.
+    Log::verbose("physics", "%s t %f %f xyz %f %f %f v %f %f %f sk %f %d %f %f %f st %f %f",
+        getIdent().c_str(),
+        World::getWorld()->getTime(), dt,
+        getXYZ().getX(), getXYZ().getY(), getXYZ().getZ(),
+        getVelocity().getX(), getVelocity().getY(), getVelocity().getZ(),
+        m_skidding->getSkidFactor(),
+        m_skidding->getSkidState(),
+        m_skidding->getSteeringFraction(),
+        getMaxSteerAngle(),
+        m_speed,
+        m_vehicle->getWheelInfo(0).m_steering,
+        m_vehicle->getWheelInfo(1).m_steering
+        );
 #endif
 
     // if its view is blocked by plunger, decrease remaining time
@@ -2119,6 +2145,7 @@ bool Kart::playCustomSFX(unsigned int type)
  */
 void Kart::updatePhysics(float dt)
 {
+
     // Check if accel is pressed for the first time. The actual timing
     // is done in getStartupBoost - it returns 0 if the start was actually
     // too slow to qualify for a boost.
@@ -2172,17 +2199,6 @@ void Kart::updatePhysics(float dt)
     float min_speed =  m && m->isZipper() ? m->getZipperMinSpeed() : -1.0f;
     m_max_speed->setMinSpeed(min_speed);
     m_max_speed->update(dt);
-
-    // Compute the speed of the kart. Smooth it with previous speed to make
-    // the camera smoother (because of capping the speed in m_max_speed
-    // the speed value jitters when approaching maximum speed. This results
-    // in the distance between kart and camera to jitter as well (typically
-    // only in the order of centimetres though). Smoothing the speed value
-    // gets rid of this jitter, and also r
-    float old_speed = m_speed;
-    m_speed = getVehicle()->getRigidBody()->getLinearVelocity().length();
-    float f=0.3f;
-    m_speed = f*m_speed + (1.0f-f)*old_speed;
 
     // calculate direction of m_speed
     const btTransform& chassisTrans = getVehicle()->getChassisWorldTransform();
@@ -2280,6 +2296,8 @@ void Kart::updateEngineSFX()
  */
 void Kart::updateEnginePowerAndBrakes(float dt)
 {
+    if(World::getWorld()->getTime() > 5.4 && World::getWorld()->getTime() < 5.55)
+        printf("");
     updateNitro(dt);
     float engine_power = getActualWheelForce();
 
@@ -2310,7 +2328,8 @@ void Kart::updateEnginePowerAndBrakes(float dt)
         if (m_controls.getSkidControl() &&
             m_kart_properties->getSkidVisualTime() == 0)
             engine_power *= 0.5f;
-
+        Log::info("ep", "%f ep %f %f",
+            World::getWorld()->getTime(), engine_power, m_controls.getAccel());
         applyEngineForce(engine_power*m_controls.getAccel());
 
         // Either all or no brake is set, so test only one to avoid

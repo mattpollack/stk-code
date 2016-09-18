@@ -111,11 +111,12 @@ void KartRewinder::rewindToState(BareNetworkString *buffer)
     t.setOrigin(buffer->getVec3());
     t.setRotation(buffer->getQuat());
     btRigidBody *body = getBody();
-    body->proceedToTransform(t);
     body->setLinearVelocity(buffer->getVec3());
     body->setAngularVelocity(buffer->getVec3());
+    body->proceedToTransform(t);
     m_has_started = buffer->getUInt8()!=0;   // necessary for startup speed boost
-    m_vehicle->instantSpeedIncreaseTo(buffer->getFloat());
+    //m_vehicle->instantSpeedIncreaseTo(buffer->getFloat());
+    buffer->getFloat();
 
     // 2) Steering and other controls
     // ------------------------------
@@ -132,6 +133,7 @@ void KartRewinder::rewindToState(BareNetworkString *buffer)
     // 5) Max speed info
     // ------------------
     m_max_speed->rewindTo(buffer);
+    m_max_speed->update(0);
 
     // 6) Skidding
     // -----------

@@ -800,6 +800,7 @@ void btKart::updateFriction(btScalar timeStep)
     btScalar fwdFactor = 0.5;
 
     bool sliding = false;
+    std::ostringstream s;
     for (int wheel=0; wheel<getNumWheels(); wheel++)
     {
         btWheelInfo& wheelInfo        = m_wheelInfo[wheel];
@@ -809,7 +810,8 @@ void btKart::updateFriction(btScalar timeStep)
         btRigidBody* groundObject =
             (btRigidBody*) wheelInfo.m_raycastInfo.m_groundObject;
         if(!groundObject) continue;
-
+        s << m_zipper_active << " " << m_zipper_speed << " " << wheelInfo.m_engineForce << " "
+          << wheelInfo.m_steering << "  ";
         if(m_zipper_active && m_zipper_speed > 0)
         {
             if (wheel==2 || wheel==3)
@@ -831,6 +833,7 @@ void btKart::updateFriction(btScalar timeStep)
             if (wheelInfo.m_engineForce != 0.f)
             {
                 rollingFriction = wheelInfo.m_engineForce* timeStep;
+                s << rollingFriction << " ";
             }
             else
             {
@@ -842,12 +845,13 @@ void btKart::updateFriction(btScalar timeStep)
                                      wheelInfo.m_raycastInfo.m_contactPointWS,
                                      m_forwardWS[wheel],maxImpulse);
                 rollingFriction = calcRollingFriction(contactPt);
+                s << rollingFriction << " ";
                 // This is a work around for the problem that a kart shakes
                 // if it is braking: we get a minor impulse forward, which
                 // bullet then tries to offset by applying a backward
                 // impulse - which is a bit too big, causing a impulse
                 // backwards, ... till the kart is shaking backwards and
-                // forwards. By onlyu applying half of the impulse in cae
+                // forwards. By only applying half of the impulse in case
                 // of low friction this goes away.
                 if(wheelInfo.m_brake && fabsf(rollingFriction)<10)
                     rollingFriction*=0.5f;
@@ -881,9 +885,9 @@ void btKart::updateFriction(btScalar timeStep)
         }   // else (!m_timed_impulse
     }   // for (int wheel=0; wheel<getNumWheels(); wheel++)
 
-
+    Log::info("rf", "%f rf %s", World::getWorld()->getTime(), s.str().c_str());
     m_zipper_active = false;
-    m_zipper_speed  = 0;
+    //m_zipper_speed  = 0;
 
     // The kart just stopped skidding. Adjust the velocity so that
     // it points in the right direction.
@@ -925,6 +929,13 @@ void btKart::updateFriction(btScalar timeStep)
         }   // for wheel <getNumWheels
     }   // if sliding
 
+    Log::info("btkart", "%f mfw %f %f %f %f %f %f %f %f",
+        World::getWorld()->getTime(),
+        m_forwardImpulse[0],m_wheelInfo[0].m_skidInfo,
+        m_forwardImpulse[1],m_wheelInfo[1].m_skidInfo,
+        m_forwardImpulse[2],m_wheelInfo[2].m_skidInfo,
+        m_forwardImpulse[3],m_wheelInfo[3].m_skidInfo
+        );
     // Apply the impulses
     // ------------------
     for (int wheel = 0;wheel<getNumWheels() ; wheel++)
@@ -932,7 +943,6 @@ void btKart::updateFriction(btScalar timeStep)
         btWheelInfo& wheelInfo = m_wheelInfo[wheel];
         btVector3 rel_pos      = wheelInfo.m_raycastInfo.m_contactPointWS
                                  - m_chassisBody->getCenterOfMassPosition();
-
         if (m_forwardImpulse[wheel] != btScalar(0.))
         {
             m_chassisBody->applyImpulse(
@@ -1061,7 +1071,7 @@ void btKart::setSliding(bool active)
  */
 void btKart::instantSpeedIncreaseTo(float speed)
 {
-    m_zipper_active = true;
+    m_zipper_active = speed > 0;
     m_zipper_speed  = speed;
 }   // activateZipper
 
