@@ -556,7 +556,7 @@ btTransform Kart::getAlignedTransform(const float custom_pitch)
     trans2.setIdentity();
     trans2.setRotation(btQuaternion(m_skidding->getVisualSkidRotation(), 0, 0));
     trans *= trans2;
-    
+
     return trans;
 }   // getAlignedTransform
 
@@ -847,7 +847,7 @@ void Kart::finishedRace(float time, bool from_server)
             RaceEventManager::getInstance()->kartFinishedRace(this, time);
         }   // isServer
 
-        // Ignore local detection of a kart finishing a race in a 
+        // Ignore local detection of a kart finishing a race in a
         // network game.
         else if(NetworkConfig::get()->isClient())
         {
@@ -865,6 +865,7 @@ void Kart::finishedRace(float time, bool from_server)
     if (dynamic_cast<SpareTireAI*>(m_controller) != NULL) return;
 
     if ((race_manager->getMinorMode() == RaceManager::MINOR_MODE_NORMAL_RACE ||
+         race_manager->getMinorMode() == RaceManager::MINOR_MODE_BUMPER_KARTS ||
          race_manager->getMinorMode() == RaceManager::MINOR_MODE_TIME_TRIAL  ||
          race_manager->getMinorMode() == RaceManager::MINOR_MODE_FOLLOW_LEADER)
          && m_controller->isPlayerController())
@@ -877,6 +878,7 @@ void Kart::finishedRace(float time, bool from_server)
                 getPosition() == 2)
                 m->addMessage(_("You won the race!"), this, 2.0f);
             else if (race_manager->getMinorMode() == RaceManager::MINOR_MODE_NORMAL_RACE ||
+                     race_manager->getMinorMode() == RaceManager::MINOR_MODE_BUMPER_KARTS ||
                      race_manager->getMinorMode() == RaceManager::MINOR_MODE_TIME_TRIAL)
             {
                 m->addMessage((getPosition() == 1 ?
@@ -891,6 +893,7 @@ void Kart::finishedRace(float time, bool from_server)
         race_manager->getMinorMode() == RaceManager::MINOR_MODE_FOLLOW_LEADER ||
         race_manager->getMinorMode() == RaceManager::MINOR_MODE_3_STRIKES     ||
         race_manager->getMinorMode() == RaceManager::MINOR_MODE_SOCCER        ||
+        race_manager->getMinorMode() == RaceManager::MINOR_MODE_BUMPER_KARTS  ||
         race_manager->getMinorMode() == RaceManager::MINOR_MODE_EASTER_EGG)
     {
         // Save for music handling in race result gui
@@ -911,6 +914,7 @@ void Kart::finishedRace(float time, bool from_server)
 void Kart::setRaceResult()
 {
     if (race_manager->getMinorMode() == RaceManager::MINOR_MODE_NORMAL_RACE ||
+        race_manager->getMinorMode() == RaceManager::MINOR_MODE_BUMPER_KARTS ||
         race_manager->getMinorMode() == RaceManager::MINOR_MODE_TIME_TRIAL)
     {
         if (m_controller->isLocalPlayerController()) // if player is on this computer
@@ -1217,7 +1221,7 @@ void Kart::update(float dt)
 
     Vec3 front(0, 0, getKartLength()*0.5f);
     m_xyz_front = getTrans()(front);
-    // Update the locally maintained speed of the kart (m_speed), which 
+    // Update the locally maintained speed of the kart (m_speed), which
     // is used furthermore for engine power, camera distance etc
     updateSpeed();
 
@@ -1651,7 +1655,7 @@ void Kart::handleMaterialSFX(const Material *material)
     // entered), the oldest (previous) sfx is stopped and deleted.
 
     // FIXME: if there are already two sfx playing, don't add another
-    // one. This should reduce the performance impact when driving 
+    // one. This should reduce the performance impact when driving
     // on the bridge in Cocoa.
     if(getLastMaterial()!=material && !m_previous_terrain_sound)
     {
@@ -1962,6 +1966,16 @@ void Kart::crashed(AbstractKart *k, bool update_attachments)
         assert(k);
         getAttachment()->handleCollisionWithKart(k);
     }
+
+    if(race_manager->getMinorMode() == RaceManager::MINOR_MODE_BUMPER_KARTS)
+    {
+        subHealth(10);
+        adjustSpeed(0.2f + 0.8f*getHealth());
+
+        k->subHealth(10);
+        k->adjustSpeed(0.2f + 0.8f*k->getHealth());
+    }
+
     m_controller->crashed(k);
     playCrashSFX(NULL, k);
 }   // crashed(Kart, update_attachments
@@ -2725,7 +2739,7 @@ void Kart::updateGraphics(float dt, const Vec3& offset_xyz,
         if(nitro_frac>1.0f) nitro_frac = 1.0f;
     }
     m_kart_gfx->updateNitroGraphics(nitro_frac);
-    
+
     // Handle leaning of karts
     // -----------------------
     // Note that we compare with maximum speed of the kart, not

@@ -79,7 +79,7 @@ void Skidding::reset()
     m_kart->getKartGFX()->setCreationRateAbsolute(KartGFX::KGFX_SKIDR, 0);
     m_kart->getKartGFX()->updateSkidLight(0);
     m_kart->getControls().setSkidControl(KartControl::SC_NONE);
-    
+
     btVector3 rot(0, 0, 0);
     // Only access the vehicle if the kart is not a ghost
     if (!m_kart->isGhostKart())
@@ -88,11 +88,11 @@ void Skidding::reset()
 
 // ----------------------------------------------------------------------------
 /** Save the skidding state of a kart. It only saves the important physics
- *  values, not visual only values like m_visual_rotation, m_gfx_jump_offset, 
+ *  values, not visual only values like m_visual_rotation, m_gfx_jump_offset,
  *  m_remaining_jump_time and m_jump_speed. Similarly m_real_steering is output
  *  of updateRewind() and will be recomputed every frame when update() is called,
  *  and similart m_skid_bonus_ready
- *  \param buffer Buffer for the state information. 
+ *  \param buffer Buffer for the state information.
  */
 void Skidding::saveState(BareNetworkString *buffer)
 {
@@ -105,7 +105,7 @@ void Skidding::saveState(BareNetworkString *buffer)
 
 // ----------------------------------------------------------------------------
 /** Restores the skidding state of a kart.
- *  \param buffer Buffer with state information. 
+ *  \param buffer Buffer with state information.
  */
 void Skidding::rewindTo(BareNetworkString *buffer)
 {
@@ -421,6 +421,10 @@ void Skidding::update(float dt, bool is_on_ground,
             // SKID_SHOW_GFX_*
             if(skidding == KartControl::SC_NONE)
             {
+                // Adds 10 health on successful skid
+                m_kart->addHealth(10);
+                m_kart->adjustSpeed(0.2f + 0.8f*m_kart->getHealth());
+
                 m_skid_state = m_skid_state == SKID_ACCUMULATE_LEFT
                              ? SKID_SHOW_GFX_LEFT
                              : SKID_SHOW_GFX_RIGHT;
@@ -443,7 +447,7 @@ void Skidding::update(float dt, bool is_on_ground,
                                              bonus_speed, bonus_speed,
                                              bonus_force, bonus_time,
                                              /*fade-out-time*/ 1.0f);
-                    
+
                     if (m_kart->getController()->canGetAchievements())
                     {
                         PlayerManager::increaseAchievement(
@@ -504,4 +508,3 @@ unsigned int Skidding::getSkidBonus(float *bonus_time,
     }
     return (unsigned int) kp->getSkidBonusSpeed().size();
 }   // getSkidBonusForce
-

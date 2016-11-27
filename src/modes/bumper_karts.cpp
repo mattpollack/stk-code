@@ -75,7 +75,7 @@ const std::string& BumperKarts::getIdent() const
     if(race_manager->getMinorMode() == RaceManager::MINOR_MODE_TIME_TRIAL)
         return IDENT_TTRIAL;
     else
-        return IDENT_STD;
+        return IDENT_BUMP;
 }   // getIdent
 
 //-----------------------------------------------------------------------------

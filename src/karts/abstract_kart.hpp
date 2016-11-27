@@ -72,6 +72,8 @@ private:
     /** Index of kart in world. */
     unsigned int m_world_kart_id;
 
+    /** Current health in bumper karts mode */
+    unsigned int m_bump_health;
 
 protected:
     /** The kart properties. */
@@ -275,7 +277,12 @@ public:
      *  like Ghost. */
     virtual float getSpeed() const = 0;
     // ------------------------------------------------------------------------
-    /** Returns the exponentially smoothened speed of the kart in 
+    /** Adjust speed values for bumper karts race mode */
+    virtual void subHealth(unsigned int amount);
+    virtual void addHealth(unsigned int amount);
+    virtual unsigned int getHealth();
+    // ------------------------------------------------------------------------
+    /** Returns the exponentially smoothened speed of the kart in
      *  which is removes shaking from camera. */
     virtual float getSmoothedSpeed() const = 0;
     // ------------------------------------------------------------------------
@@ -459,7 +466,7 @@ public:
     /** Set a text that is displayed on top of a kart.
      */
     virtual void setOnScreenText(const wchar_t *text) = 0;
-    // ------------------------------------------------------------------------- 
+    // -------------------------------------------------------------------------
     /** Counter which is used for displaying wrong way message after a delay */
     virtual float getWrongwayCounter() = 0;
     virtual void setWrongwayCounter(float counter) = 0;
@@ -479,4 +486,3 @@ public:
 #endif
 
 /* EOF */
-

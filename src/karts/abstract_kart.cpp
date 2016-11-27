@@ -52,6 +52,8 @@ AbstractKart::AbstractKart(const std::string& ident,
     m_kart_animation  = NULL;
     assert(m_kart_properties);
 
+    m_bump_health = 100;
+
     // We have to take a copy of the kart model, since otherwise
     // the animations will be mixed up (i.e. different instances of
     // the same model will set different animation frames).
@@ -78,6 +80,7 @@ AbstractKart::~AbstractKart()
 // ----------------------------------------------------------------------------
 void AbstractKart::reset()
 {
+    m_bump_health = 100;
     Moveable::reset();
     if(m_kart_animation)
     {
@@ -132,6 +135,33 @@ void AbstractKart::setKartAnimation(AbstractKartAnimation *ka)
     assert( (ka!=NULL) ^ (m_kart_animation!=NULL) );
     m_kart_animation = ka;
 }   // setKartAnimation
+
+// -----------------------------------------------------------------------------
+/** Called when the player needs it's bump health set */
+void AbstractKart::subHealth(unsigned int amount)
+{
+    if (amount > m_bump_health)
+        m_bump_health = 0;
+    else
+        m_bump_health -= amount;
+}
+
+// -----------------------------------------------------------------------------
+/** Called when the player needs it's bump health set */
+void AbstractKart::addHealth(unsigned int amount)
+{
+    if (amount + m_bump_health > 100)
+        m_bump_health = 100;
+    else
+        m_bump_health += amount;
+}
+
+// -----------------------------------------------------------------------------
+/** Called when setting player speed */
+unsigned int AbstractKart::getHealth()
+{
+    return m_bump_health;
+}
 
 // ----------------------------------------------------------------------------
 /** Moves the current physical transform into this kart's position.
