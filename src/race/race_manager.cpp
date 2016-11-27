@@ -43,6 +43,10 @@
 #include "modes/world.hpp"
 #include "modes/three_strikes_battle.hpp"
 #include "modes/soccer_world.hpp"
+
+// Adding custom mode
+#include "modes/bumper_karts.hpp"
+
 #include "network/protocol_manager.hpp"
 #include "network/network_config.hpp"
 #include "network/protocols/start_game_protocol.hpp"
@@ -96,7 +100,7 @@ RaceManager::~RaceManager()
 
 //-----------------------------------------------------------------------------
 /** Resets the race manager in preparation for a new race. It sets the
- *  counter of finished karts to zero. It is called by world when 
+ *  counter of finished karts to zero. It is called by world when
  *  restarting a race.
  */
 void RaceManager::reset()
@@ -143,7 +147,7 @@ void RaceManager::setPlayerKart(unsigned int player_id, const RemoteKartInfo& ki
 {
     m_player_karts[player_id] = ki;
 }   // setPlayerKart
-    
+
 // ----------------------------------------------------------------------------
 void RaceManager::setPlayerKart(unsigned int player_id,
                                  const std::string &kart_name)
@@ -224,7 +228,7 @@ void RaceManager::setNumPlayers(int players, int local_players)
  *  to HARD.
  *  \param difficulty The difficulty as string.
  */
-RaceManager::Difficulty 
+RaceManager::Difficulty
                   RaceManager::convertDifficulty(const std::string &difficulty)
 {
     if (difficulty == "novice")
@@ -339,7 +343,7 @@ void RaceManager::startNew(bool from_overworld)
                                          m_grand_prix.getId(),
                                          m_minor_mode,
                                          m_player_karts.size());
-    
+
             // Saved GP only in offline mode
             if (m_continue_saved_gp)
             {
@@ -411,7 +415,7 @@ void RaceManager::startNew(bool from_overworld)
     // -----------------------------------------------------
     for(unsigned int i = 0; i < m_player_karts.size(); i++)
     {
-        KartType kt= m_player_karts[i].isNetworkPlayer() ? KT_NETWORK_PLAYER 
+        KartType kt= m_player_karts[i].isNetworkPlayer() ? KT_NETWORK_PLAYER
                                                          : KT_PLAYER;
         m_kart_status.push_back(KartStatus(m_player_karts[i].getKartName(), i,
                                            m_player_karts[i].getLocalPlayerId(),
@@ -434,7 +438,7 @@ void RaceManager::startNew(bool from_overworld)
             m_track_number = m_saved_gp->getNextTrack();
             m_saved_gp->loadKarts(m_kart_status);
         }
-        else 
+        else
         {
             while (m_saved_gp != NULL)
             {
@@ -516,6 +520,11 @@ void RaceManager::startNextRace()
         World::setWorld(new StandardRace());
     else if(m_minor_mode==MINOR_MODE_TUTORIAL)
         World::setWorld(new TutorialWorld());
+
+    // Add bumper karts mode
+    else if(m_minor_mode==MINOR_MODE_BUMPER_KARTS)
+        World::setWorld(new BumperKarts());
+
     else if(m_minor_mode==MINOR_MODE_3_STRIKES)
         World::setWorld(new ThreeStrikesBattle());
     else if(m_minor_mode==MINOR_MODE_SOCCER)

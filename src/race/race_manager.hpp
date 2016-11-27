@@ -40,6 +40,7 @@ class SavedGrandPrix;
 class Track;
 
 static const std::string IDENT_STD      ("STANDARD"        );
+static const std::string IDENT_BUMP     ("BUMPER KARTS"    );
 static const std::string IDENT_TTRIAL   ("STD_TIMETRIAL"   );
 static const std::string IDENT_FTL      ("FOLLOW_LEADER"   );
 static const std::string IDENT_STRIKES  ("BATTLE_3_STRIKES");
@@ -57,7 +58,7 @@ static const std::string IDENT_CUTSCENE ("CUTSCENE"        );
  *     manager stores the GP information, but World queries only track
  *     and number of laps, so in case of GP this information is taken from
  *     the GrandPrix object), and local player information (number of local
- *     players, and selected karts). 
+ *     players, and selected karts).
  *     Information about player karts (which player selected which kart,
  *     player ids) is stored in a RemoteKartInfo structure and used later
  *     to initialise the KartStatus array (startNew()). The KartStatus array
@@ -110,6 +111,7 @@ public:
         MINOR_MODE_FOLLOW_LEADER = LINEAR_RACE(2, false),
         MINOR_MODE_OVERWORLD     = LINEAR_RACE(3, false),
         MINOR_MODE_TUTORIAL      = LINEAR_RACE(4, false),
+        MINOR_MODE_BUMPER_KARTS  = LINEAR_RACE(5, true),
 
         MINOR_MODE_3_STRIKES     = BATTLE_ARENA(0),
         MINOR_MODE_SOCCER        = BATTLE_ARENA(1),
@@ -135,6 +137,7 @@ public:
         switch (mode)
         {
             case MINOR_MODE_NORMAL_RACE:    return IDENT_STD;
+            case MINOR_MODE_BUMPER_KARTS:   return IDENT_BUMP;
             case MINOR_MODE_TIME_TRIAL:     return IDENT_TTRIAL;
             case MINOR_MODE_FOLLOW_LEADER:  return IDENT_FTL;
             case MINOR_MODE_3_STRIKES:      return IDENT_STRIKES;
@@ -154,6 +157,7 @@ public:
         switch (mode)
         {
             case MINOR_MODE_NORMAL_RACE:    return "/gui/mode_normal.png";
+            case MINOR_MODE_BUMPER_KARTS:   return "/gui/mode_bump.png";
             case MINOR_MODE_TIME_TRIAL:     return "/gui/mode_tt.png";
             case MINOR_MODE_FOLLOW_LEADER:  return "/gui/mode_ftl.png";
             case MINOR_MODE_3_STRIKES:      return "/gui/mode_3strikes.png";
@@ -173,6 +177,8 @@ public:
         {
             //I18N: Game mode
             case MINOR_MODE_NORMAL_RACE:    return _("Normal Race");
+                //I18N: Game mode
+            case MINOR_MODE_BUMPER_KARTS:   return _("Bumper Karts");
             //I18N: Game mode
             case MINOR_MODE_TIME_TRIAL:     return _("Time Trial");
             //I18N: Game mode
@@ -194,6 +200,7 @@ public:
         switch (m_minor_mode)
         {
             case MINOR_MODE_NORMAL_RACE:    return true;
+            case MINOR_MODE_BUMPER_KARTS:   return true;
             case MINOR_MODE_TIME_TRIAL:     return true;
             case MINOR_MODE_FOLLOW_LEADER:  return true;
             case MINOR_MODE_3_STRIKES:      return true;
@@ -213,6 +220,7 @@ public:
                                                        const std::string &name)
     {
         if      (name==IDENT_STD    ) return MINOR_MODE_NORMAL_RACE;
+        else if (name==IDENT_BUMP   ) return MINOR_MODE_BUMPER_KARTS;
         else if (name==IDENT_TTRIAL ) return MINOR_MODE_TIME_TRIAL;
         else if (name==IDENT_FTL    ) return MINOR_MODE_FOLLOW_LEADER;
         else if (name==IDENT_STRIKES) return MINOR_MODE_3_STRIKES;
@@ -498,9 +506,9 @@ public:
     // ------------------------------------------------------------------------
     MinorRaceModeType getMinorMode() const { return m_minor_mode; }
     // ------------------------------------------------------------------------
-    unsigned int getNumPlayers() const 
+    unsigned int getNumPlayers() const
     {
-        return (unsigned int) m_player_karts.size(); 
+        return (unsigned int) m_player_karts.size();
     }   // getNumPlayers
     // ------------------------------------------------------------------------
     /** \brief Returns the number lf laps.

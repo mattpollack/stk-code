@@ -41,6 +41,7 @@ const int CONFIG_CODE_3STRIKES  = 3;
 const int CONFIG_CODE_EASTER    = 4;
 const int CONFIG_CODE_SOCCER    = 5;
 const int CONFIG_CODE_GHOST     = 6;
+const int CONFIG_CODE_BUMP      = 7;
 
 using namespace GUIEngine;
 DEFINE_SCREEN_SINGLETON( RaceSetupScreen );
@@ -119,6 +120,11 @@ void RaceSetupScreen::init()
     name5 += _("Push the ball into the opposite cage to score goals.");
     w2->addItem( name5, IDENT_SOCCER, RaceManager::getIconOf(RaceManager::MINOR_MODE_SOCCER));
 
+    irr::core::stringw name7 = irr::core::stringw(
+        RaceManager::getNameOf(RaceManager::MINOR_MODE_BUMPER_KARTS)) + L"\n";
+    name7 += _("Run into players to slow them down.");
+    w2->addItem( name7, IDENT_BUMP, RaceManager::getIconOf(RaceManager::MINOR_MODE_BUMPER_KARTS));
+
 #define ENABLE_EASTER_EGG_MODE
 #ifdef ENABLE_EASTER_EGG_MODE
     if(race_manager->getNumLocalPlayers() == 1)
@@ -159,6 +165,9 @@ void RaceSetupScreen::init()
         break;
     case CONFIG_CODE_SOCCER :
         w2->setSelection(IDENT_SOCCER, PLAYER_ID_GAME_MASTER, true);
+        break;
+    case CONFIG_CODE_BUMP :
+        w2->setSelection(IDENT_BUMP, PLAYER_ID_GAME_MASTER, true);
         break;
     case CONFIG_CODE_GHOST :
         w2->setSelection(IDENT_GHOST, PLAYER_ID_GAME_MASTER, true);
@@ -241,6 +250,12 @@ void RaceSetupScreen::eventCallback(Widget* widget, const std::string& name,
             UserConfigParams::m_game_mode = CONFIG_CODE_SOCCER;
             SoccerSetupScreen::getInstance()->push();
         }
+        else if (selectedMode == IDENT_BUMP)
+        {
+            race_manager->setMinorMode(RaceManager::MINOR_MODE_BUMPER_KARTS);
+            UserConfigParams::m_game_mode = CONFIG_CODE_BUMP;
+            TracksAndGPScreen::getInstance()->push();
+        }
         else if (selectedMode == IDENT_GHOST)
         {
             race_manager->setMinorMode(RaceManager::MINOR_MODE_TIME_TRIAL);
@@ -267,9 +282,9 @@ void RaceSetupScreen::assignDifficulty()
 {
     RibbonWidget* difficulty_widget = getWidget<RibbonWidget>("difficulty");
     assert(difficulty_widget != NULL);
-    const std::string& difficulty = 
+    const std::string& difficulty =
         difficulty_widget->getSelectionIDString(PLAYER_ID_GAME_MASTER);
-    
+
     RaceManager::Difficulty diff = RaceManager::convertDifficulty(difficulty);
     UserConfigParams::m_difficulty = diff;
     race_manager->setDifficulty(diff);

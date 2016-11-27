@@ -719,7 +719,8 @@ bool CIrrDeviceMacOSX::createWindow()
 					if (!CreationParams.WindowId)
 					{
 						[Window center];
-						[(NSFileManager *)Window setDelegate:[NSApp delegate]];
+						//[(NSFileManager *)Window setDelegate:[NSApp delegate]];
+                        //[(NSApplication *)Window setDelegate:[NSApp delegate]];
 
 						if(CreationParams.DriverType == video::EDT_OPENGL)
 							[OGLContext setView:[Window contentView]];
@@ -819,7 +820,7 @@ bool CIrrDeviceMacOSX::createWindow()
                                    (int)CreationParams.Bits,
                                    (int)depthSize
                                    );
-                            
+
 							pixelFormat = NULL;
 							numPixelFormats = 0;
 							CGLError error = CGLChoosePixelFormat(fullattribs,&pixelFormat,&numPixelFormats);
@@ -830,7 +831,7 @@ bool CIrrDeviceMacOSX::createWindow()
                                 printf("OSX DEBUG: CGLChoosePixelFormat returned error %i (%s)\n",
                                        (int)error, CGLErrorString (error));
                             }
-                            
+
 							if (pixelFormat != NULL)
 							{
                                 printf("OSX DEBUG: pixelFormat != NULL\n");
@@ -1314,7 +1315,7 @@ void CIrrDeviceMacOSX::storeMouseLocation()
 
         if (CursorControl == NULL)
             return;
-        
+
 		const core::position2di& curr = ((CCursorControl *)CursorControl)->getPosition();
 		if (curr.X != x || curr.Y != y)
 		{
@@ -1327,7 +1328,7 @@ void CIrrDeviceMacOSX::storeMouseLocation()
 			postEventFromUser(ievent);
 		}
 	}
-    
+
     if (CursorControl != NULL)
         ((CCursorControl *)CursorControl)->updateInternalCursorPosition(x,y);
 }
@@ -1917,4 +1918,3 @@ video::IVideoModeList* CIrrDeviceMacOSX::getVideoModeList()
 } // end namespace
 
 #endif // _IRR_COMPILE_WITH_OSX_DEVICE_
-
