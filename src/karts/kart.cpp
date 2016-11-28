@@ -1550,6 +1550,14 @@ void Kart::update(float dt)
         }
     }
 
+    // Slow the racer down when health is low
+    if (race_manager->getMinorMode() == RaceManager::MINOR_MODE_BUMPER_KARTS)
+    {
+        m_max_speed->setSlowdown(MaxSpeed::MS_DECREASE_MIN,
+                                 0.8f + ((float) getHealth()/100.0f)*0.2f,
+                                 0);
+    }
+
 }   // update
 
 //-----------------------------------------------------------------------------
@@ -1970,10 +1978,7 @@ void Kart::crashed(AbstractKart *k, bool update_attachments)
     if(race_manager->getMinorMode() == RaceManager::MINOR_MODE_BUMPER_KARTS)
     {
         subHealth(10);
-        adjustSpeed(0.2f + 0.8f*getHealth());
-
         k->subHealth(10);
-        k->adjustSpeed(0.2f + 0.8f*k->getHealth());
     }
 
     m_controller->crashed(k);
@@ -1994,6 +1999,12 @@ void Kart::crashed(const Material *m, const Vec3 &normal)
     // This makes it easier to see if a kart hit the track (esp.
     // after a jump).
     // FIXME: This should be removed once the physics are fixed.
+
+    if(race_manager->getMinorMode() == RaceManager::MINOR_MODE_BUMPER_KARTS)
+    {
+        subHealth(10);
+    }
+
     if(UserConfigParams::m_physics_debug)
     {
         // Add a counter to make it easier to see if a new line of

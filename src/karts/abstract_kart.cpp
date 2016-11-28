@@ -156,13 +156,6 @@ void AbstractKart::addHealth(unsigned int amount)
         m_bump_health += amount;
 }
 
-// -----------------------------------------------------------------------------
-/** Called when setting player speed */
-unsigned int AbstractKart::getHealth()
-{
-    return m_bump_health;
-}
-
 // ----------------------------------------------------------------------------
 /** Moves the current physical transform into this kart's position.
  */

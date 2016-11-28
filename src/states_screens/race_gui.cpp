@@ -94,8 +94,10 @@ RaceGUI::RaceGUI()
 
     m_is_tutorial = (race_manager->getTrackName() == "tutorial");
 
-    m_speed_meter_icon = material_manager->getMaterial("speedback.png");
-    m_speed_bar_icon   = material_manager->getMaterial("speedfore.png");
+    m_speed_meter_icon      = material_manager->getMaterial("speedback.png");
+    m_speed_bar_icon        = material_manager->getMaterial("speedfore.png");
+    m_speed_bar_health      = material_manager->getMaterial("speedhealth.png");
+    m_speed_bar_health_back = material_manager->getMaterial("speedhealthback.png");
     //createMarkerTexture();
 
     // Determine maximum length of the rank/lap text, in order to
@@ -247,6 +249,11 @@ void RaceGUI::renderPlayerView(const Camera *camera, float dt)
     if (!UserConfigParams::m_multitouch_enabled)
     {
         drawSpeedEnergyRank(kart, viewport, scaling, dt);
+    }
+
+    if (race_manager->getMinorMode() == RaceManager::MINOR_MODE_BUMPER_KARTS)
+    {
+        drawBumperKarts(kart, viewport, scaling, dt);
     }
 
     if (!m_is_tutorial)
@@ -769,7 +776,6 @@ void RaceGUI::drawSpeedEnergyRank(const AbstractKart* kart,
 
     drawRank(kart, offset, min_ratio, meter_width, meter_height, dt);
 
-
     if(speed <=0) return;  // Nothing to do if speed is negative.
 
     // Draw the actual speed bar (if the speed is >0)
@@ -846,6 +852,39 @@ void RaceGUI::drawSpeedEnergyRank(const AbstractKart* kart,
         index, count-2, video::EVT_STANDARD, scene::EPT_TRIANGLE_FAN);
 
 }   // drawSpeedEnergyRank
+
+//-----------------------------------------------------------------------------
+/** Draw appropriate bumper karts info
+ */
+void RaceGUI::drawBumperKarts(const AbstractKart* kart,
+                              const core::recti &viewport,
+                              const core::vector2df &scaling, float dt)
+{
+    unsigned int health = kart->getHealth();
+
+    //m_speed_bar_health;
+    core::vector2df offsetHealth;
+    offsetHealth.X = viewport.LowerRightCorner.X - ( 24.0f + 5.0f )*scaling.X;
+    offsetHealth.Y = viewport.LowerRightCorner.Y - ( 0.0f + 140.0f )*scaling.Y;
+
+    const core::rect<s32> health_pos((int)offsetHealth.X,
+                                     (int)offsetHealth.Y - health,
+                                     (int)offsetHealth.X + 32,
+                                     (int)offsetHealth.Y);
+
+    const core::rect<s32> health_back_pos(
+                                     (int)offsetHealth.X,
+                                     (int)offsetHealth.Y - 102,
+                                     (int)offsetHealth.X + 32,
+                                     (int)offsetHealth.Y - 1);
+
+    video::ITexture *health_texture         = m_speed_bar_health->getTexture();
+    video::ITexture *health_back_texture    = m_speed_bar_health_back->getTexture();
+    const core::rect<s32> health_texture_coords(core::position2d<s32>(0,0), health_texture->getSize());
+    const core::rect<s32> health_back_texture_coords(core::position2d<s32>(0,0), health_back_texture->getSize());
+    draw2DImage(health_back_texture, health_back_pos, health_back_texture_coords, NULL, NULL, true);
+    draw2DImage(health_texture, health_pos, health_texture_coords, NULL, NULL, true);
+}
 
 //-----------------------------------------------------------------------------
 /** Displays the rank and the lap of the kart.

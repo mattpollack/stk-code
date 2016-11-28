@@ -43,6 +43,8 @@ private:
 
     Material        *m_speed_meter_icon;
     Material        *m_speed_bar_icon;
+    Material        *m_speed_bar_health;
+    Material        *m_speed_bar_health_back;
 
     // Minimap related variables
     // -------------------------
@@ -113,12 +115,14 @@ private:
     void drawMultitouchSteering (const AbstractKart* kart,
                                  const core::recti &viewport,
                                  const core::vector2df &scaling);
+    void drawBumperKarts        (const AbstractKart* kart,
+                                 const core::recti &viewport,
+                                 const core::vector2df &scaling, float dt);
 
     /** Display items that are shown once only (for all karts). */
     void drawGlobalMiniMap     ();
     void drawGlobalTimer       ();
     void drawScores();
-
 
 public:
 

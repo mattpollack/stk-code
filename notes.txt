@@ -1,1 +1,5 @@
-m_bump_health
+Kart::setSlowdown(unsigned int category, float max_speed_fraction,
+                       float fade_in_time)
+
+m_speed_meter_icon = material_manager->getMaterial("speedback.png");
+m_speed_bar_icon   = material_manager->getMaterial("speedfore.png");

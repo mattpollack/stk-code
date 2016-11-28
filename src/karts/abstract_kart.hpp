@@ -280,7 +280,7 @@ public:
     /** Adjust speed values for bumper karts race mode */
     virtual void subHealth(unsigned int amount);
     virtual void addHealth(unsigned int amount);
-    virtual unsigned int getHealth();
+    virtual unsigned int getHealth() const { return m_bump_health; }
     // ------------------------------------------------------------------------
     /** Returns the exponentially smoothened speed of the kart in
      *  which is removes shaking from camera. */

@@ -421,10 +421,6 @@ void Skidding::update(float dt, bool is_on_ground,
             // SKID_SHOW_GFX_*
             if(skidding == KartControl::SC_NONE)
             {
-                // Adds 10 health on successful skid
-                m_kart->addHealth(10);
-                m_kart->adjustSpeed(0.2f + 0.8f*m_kart->getHealth());
-
                 m_skid_state = m_skid_state == SKID_ACCUMULATE_LEFT
                              ? SKID_SHOW_GFX_LEFT
                              : SKID_SHOW_GFX_RIGHT;
@@ -436,6 +432,10 @@ void Skidding::update(float dt, bool is_on_ground,
                 m_kart->getVehicle()->setTimedRotation(t, rot);
                 // skid_time is used to count backwards for the GFX
                 m_skid_time = t;
+
+                // Add health upon successful skid
+                m_kart->addHealth((unsigned int) bonus_speed*5.0f);
+
                 if(bonus_time>0)
                 {
                     m_kart->getKartGFX()
