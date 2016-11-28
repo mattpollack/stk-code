@@ -979,6 +979,11 @@ void Kart::collectedItem(Item *item, int add_info)
     float old_energy          = m_collected_energy;
     const Item::ItemType type = item->getType();
 
+    if (race_manager->getMinorMode() == RaceManager::MINOR_MODE_BUMPER_KARTS)
+    {
+        addHealth(10);
+    }
+
     switch (type)
     {
     case Item::ITEM_BANANA:

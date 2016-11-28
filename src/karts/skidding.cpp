@@ -434,7 +434,7 @@ void Skidding::update(float dt, bool is_on_ground,
                 m_skid_time = t;
 
                 // Add health upon successful skid
-                m_kart->addHealth((unsigned int) bonus_speed*5.0f);
+                m_kart->addHealth((unsigned int) bonus_speed*2.0f);
 
                 if(bonus_time>0)
                 {
